@@ -1,0 +1,61 @@
+<a href="/admin/products" class="btn btn-outline-custom mb-4"><i class="fa-solid fa-arrow-left me-2"></i>Back to Products</a>
+
+<div class="stat-card">
+    <h3 class="mb-4"><%= product ? 'Edit Product' : 'Add New Product' %></h3>
+    <form action="<%= product ? '/admin/products/edit/' + product.id : '/admin/products/add' %>" method="POST" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Product Name</label>
+                    <input type="text" class="form-control" name="name" value="<%= product ? product.name : '' %>" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Description</label>
+                    <textarea class="form-control" name="description" rows="5"><%= product ? product.description : '' %></textarea>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Price (₦)</label>
+                        <input type="number" class="form-control" name="price" step="0.01" value="<%= product ? product.price : '' %>" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Stock</label>
+                        <input type="number" class="form-control" name="stock" value="<%= product ? product.stock : 0 %>" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Status</label>
+                        <select class="form-select" name="status">
+                            <option value="active" <%= product && product.status==='active' ? 'selected' : '' %>>Active</option>
+                            <option value="draft" <%= product && product.status==='draft' ? 'selected' : '' %>>Draft</option>
+                            <option value="inactive" <%= product && product.status==='inactive' ? 'selected' : '' %>>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Category</label>
+                    <select class="form-select" name="category_id">
+                        <option value="">-- Select --</option>
+                        <% categories.forEach(c => { %>
+                            <option value="<%= c.id %>" <%= product && product.category_id == c.id ? 'selected' : '' %>><%= c.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Product Image</label>
+                    <input type="file" class="form-control" name="image" accept="image/*">
+                    <% if (product && product.image_url) { %>
+                        <img src="<%= product.image_url %>" class="img-fluid rounded mt-2" style="max-height:150px">
+                    <% } %>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">3D Model (.glb/.gltf)</label>
+                    <input type="file" class="form-control" name="ar_model" accept=".glb,.gltf">
+                    <small class="text-muted-custom">Upload a 3D model for AR preview</small>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary-custom px-5 mt-3"><i class="fa-solid fa-save me-2"></i><%= product ? 'Update Product' : 'Add Product' %></button>
+    </form>
+</div>

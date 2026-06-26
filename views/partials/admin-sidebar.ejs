@@ -1,0 +1,19 @@
+<div class="admin-sidebar">
+    <div class="sidebar-brand">
+        <i class="fa-solid fa-gem"></i> ResinArt Admin
+    </div>
+    <nav class="nav flex-column mt-2">
+        <a class="nav-link" href="/admin/dashboard"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+        <a class="nav-link" href="/admin/products"><i class="fa-solid fa-box"></i>Products</a>
+        <a class="nav-link" href="/admin/categories"><i class="fa-solid fa-tags"></i>Categories</a>
+        <a class="nav-link" href="/admin/orders"><i class="fa-solid fa-receipt"></i>Orders</a>
+        <% if (user && user.role === 'admin') { %>
+            <a class="nav-link" href="/admin/users"><i class="fa-solid fa-users"></i>Users</a>
+            <a class="nav-link" href="/admin/sales-reps"><i class="fa-solid fa-user-tie"></i>Sales Reps</a>
+        <% } %>
+        <a class="nav-link" href="/admin/reviews"><i class="fa-solid fa-star"></i>Reviews</a>
+        <hr class="mx-3">
+        <a class="nav-link" href="/"><i class="fa-solid fa-globe"></i>View Store</a>
+        <a class="nav-link text-danger" href="/auth/logout"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
+    </nav>
+</div>

@@ -1,0 +1,70 @@
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fa-solid fa-gem"></i> ResinArt AR
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Close Button for Mobile -->
+            <button class="btn-close d-lg-none position-absolute top-0 end-0 m-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Close"></button>
+            
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/shop">Shop</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/contact">Contact</a>
+                </li>
+
+                <% if (user) { %>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <% if (user.profile_image) { %>
+                                <img src="<%= user.profile_image %>" alt="Profile" class="profile-img-small">
+                            <% } else { %>
+                                <div class="profile-img-placeholder-small">
+                                    <i class="fa-regular fa-user"></i>
+                                </div>
+                            <% } %>
+                            <%= user.first_name %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <% if (user.role === 'admin') { %>
+                                <li><a class="dropdown-item" href="/admin/dashboard"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+                            <% } else { %>
+                                <li><a class="dropdown-item" href="/profile"><i class="fa-regular fa-id-badge me-2"></i>Profile</a></li>
+                                <li><a class="dropdown-item" href="/orders"><i class="fa-solid fa-box me-2"></i>Orders</a></li>
+                            <% } %>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="nav-link position-relative" href="/notifications" id="notif-bell">
+                            <i class="fa-regular fa-bell fs-5"></i>
+                            <span class="position-absolute top-10 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notif-count">
+                                0
+                            </span>
+                        </a>
+                    </li>
+<% } else { %>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-outline-custom me-2" href="/auth/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary-custom" href="/auth/signup">Sign Up</a>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>

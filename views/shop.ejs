@@ -1,0 +1,115 @@
+<link rel="stylesheet" href="/css/shop.css">
+
+<section class="py-5" style="margin-top: 80px;">
+    <div class="container">
+        <!-- Shop Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5">
+            <div>
+                <h1 class="display-5 mb-2">Our Collection</h1>
+                <p class="text-muted-custom mb-0">Explore our handcrafted resin art pieces</p>
+            </div>
+            <!-- Search -->
+            <form action="/shop" method="GET" class="mt-3 mt-md-0">
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" class="form-control" name="search" placeholder="Search products..." value="<%= currentSearch %>">
+                    <button class="btn btn-primary-custom" type="submit"><i class="fa-solid fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-3 mb-4">
+                <div class="resin-card p-4">
+                    <h5 class="mb-3">Categories</h5>
+                    <a href="/shop" class="d-block mb-2 footer-link <%= !currentCategory ? 'fw-bold' : '' %>">All Products</a>
+                    <% categories.forEach(cat => { %>
+                        <a href="/shop?category=<%= cat.id %>" class="d-block mb-2 footer-link <%= currentCategory == cat.id ? 'fw-bold' : '' %>">
+                            <%= cat.name %>
+                        </a>
+                    <% }) %>
+
+                    <hr>
+                    <h5 class="mb-3">Sort By</h5>
+                    <form action="/shop" method="GET" id="sortForm">
+                        <input type="hidden" name="category" value="<%= currentCategory %>">
+                        <input type="hidden" name="search" value="<%= currentSearch %>">
+                        <select name="sort" class="form-select" onchange="document.getElementById('sortForm').submit()">
+                            <option value="latest" <%= currentSort === 'latest' ? 'selected' : '' %>>Latest</option>
+                            <option value="price_asc" <%= currentSort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+                            <option value="price_desc" <%= currentSort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+                            <option value="popular" <%= currentSort === 'popular' ? 'selected' : '' %>>Popular</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="col-lg-9">
+                <% if (products.length === 0) { %>
+                    <div class="text-center py-5">
+                        <i class="fa-solid fa-box-open fs-1 text-muted-custom mb-3"></i>
+                        <h4>No products found</h4>
+                        <p class="text-muted-custom">Try adjusting your search or filter criteria.</p>
+                    </div>
+                <% } else { %>
+                    <div class="row g-4">
+                        <% products.forEach(product => { %>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="resin-card h-100">
+                                    <div class="card-img-top-wrapper">
+                                        <% if (product.image_url) { %>
+                                            <img src="<%= product.image_url %>" class="card-img-top" alt="<%= product.name %>">
+                                        <% } else { %>
+                                            <div class="d-flex align-items-center justify-content-center h-100" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); min-height: 200px;">
+                                                <i class="fa-solid fa-gem text-white fs-1"></i>
+                                            </div>
+                                        <% } %>
+                                        <span class="ar-badge"><i class="fa-solid fa-cube"></i> AR</span>
+                                    </div>
+                                    <div class="p-3 card-body-custom">
+                                        <p class="text-muted-custom small mb-1"><%= product.category_name || 'Uncategorized' %></p>
+                                        <h5 class="mb-2"><a href="/shop/product/<%= product.id %>" class="text-decoration-none" style="color: var(--text-dark);"><%= product.name %></a></h5>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold fs-5" style="color: var(--primary-color);">₦<%= Number(product.price).toLocaleString() %></span>
+                                            <% if (product.stock > 0) { %>
+                                                <form action="/cart/add" method="POST" class="d-inline">
+                                                    <input type="hidden" name="product_id" value="<%= product.id %>">
+                                                    <input type="hidden" name="quantity" value="1">
+                                                    <button type="submit" class="btn btn-primary-custom btn-sm">
+                                                        <i class="fa-solid fa-cart-plus"></i>
+                                                    </button>
+                                                </form>
+                                            <% } else { %>
+                                                <span class="badge bg-danger">Out of stock</span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+
+                    <!-- Pagination -->
+                    <% if (totalPages > 1) { %>
+                        <nav class="mt-5">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item <%= currentPage <= 1 ? 'disabled' : '' %>">
+                                    <a class="page-link" href="/shop?page=<%= currentPage - 1 %>&category=<%= currentCategory %>&sort=<%= currentSort %>&search=<%= currentSearch %>">Previous</a>
+                                </li>
+                                <% for (let i = 1; i <= totalPages; i++) { %>
+                                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                        <a class="page-link" href="/shop?page=<%= i %>&category=<%= currentCategory %>&sort=<%= currentSort %>&search=<%= currentSearch %>"><%= i %></a>
+                                    </li>
+                                <% } %>
+                                <li class="page-item <%= currentPage >= totalPages ? 'disabled' : '' %>">
+                                    <a class="page-link" href="/shop?page=<%= currentPage + 1 %>&category=<%= currentCategory %>&sort=<%= currentSort %>&search=<%= currentSearch %>">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,57 @@
+<a href="/admin/orders" class="btn btn-outline-custom mb-4"><i class="fa-solid fa-arrow-left me-2"></i>Back to Orders</a>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="stat-card">
+            <h3 class="mb-3">Order #<%= order.id %></h3>
+            <p class="text-muted-custom"><strong>Date:</strong> <%= new Date(order.created_at).toLocaleString() %></p>
+            <p class="text-muted-custom"><strong>Shipping:</strong> <%= order.shipping_address %></p>
+            <% if (order.delivery_tracking_number) { %>
+                <p class="text-muted-custom"><strong>Tracking:</strong> <%= order.delivery_tracking_number %></p>
+            <% } %>
+            <hr>
+            <h5 class="mb-3">Items</h5>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+                    <tbody>
+                        <% items.forEach(item => { %>
+                            <tr>
+                                <td class="d-flex align-items-center gap-2">
+                                    <% if (item.image_url) { %><img src="<%= item.image_url %>" class="rounded" style="width:40px;height:40px;object-fit:cover"><% } %>
+                                    <%= item.name %>
+                                </td>
+                                <td><%= item.quantity %></td>
+                                <td>₦<%= Number(item.price).toLocaleString() %></td>
+                                <td>₦<%= (item.price * item.quantity).toLocaleString() %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-end mt-3"><strong class="fs-5">Total: <span style="color:var(--primary-color)">₦<%= Number(order.total_amount).toLocaleString() %></span></strong></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="stat-card">
+            <h5 class="mb-3">Update Status</h5>
+            <form action="/admin/orders/status/<%= order.id %>" method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Order Status</label>
+                    <select class="form-select" name="status">
+                        <option value="pending" <%= order.status==='pending'?'selected':'' %>>Pending</option>
+                        <option value="paid" <%= order.status==='paid'?'selected':'' %>>Paid</option>
+                        <option value="shipped" <%= order.status==='shipped'?'selected':'' %>>Shipped</option>
+                        <option value="delivered" <%= order.status==='delivered'?'selected':'' %>>Delivered</option>
+                        <option value="cancelled" <%= order.status==='cancelled'?'selected':'' %>>Cancelled</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tracking Number</label>
+                    <input type="text" class="form-control" name="tracking_number" value="<%= order.delivery_tracking_number || '' %>" placeholder="Enter tracking number">
+                </div>
+                <button type="submit" class="btn btn-primary-custom w-100">Update</button>
+            </form>
+        </div>
+    </div>
+</div>

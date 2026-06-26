@@ -1,0 +1,224 @@
+<link rel="stylesheet" href="/css/shop.css">
+
+<section class="py-5" style="margin-top: 80px;">
+    <div class="container">
+        <div class="row">
+            <!-- Product Image & AR -->
+            <div class="col-lg-6 mb-4">
+                <div class="resin-card p-3">
+                    <% if (product.image_url) { %>
+                        <img src="<%= product.image_url %>" alt="<%= product.name %>" class="img-fluid rounded-3 w-100" id="mainImage" style="max-height: 500px; object-fit: cover; cursor: zoom-in;" onclick="this.classList.toggle('zoomed')">
+                    <% } else { %>
+                        <div class="d-flex align-items-center justify-content-center rounded-3" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); height: 400px;">
+                            <i class="fa-solid fa-gem text-white" style="font-size: 5rem;"></i>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- AR Preview -->
+                <% if (arModel) { %>
+                    <div class="resin-card p-4 mt-3">
+                        <h5 class="mb-3"><i class="fa-solid fa-vr-cardboard me-2" style="color: var(--primary-color);"></i>3D / AR Preview</h5>
+                        <model-viewer
+                            src="<%= arModel.model_url %>"
+                            alt="3D model of <%= product.name %>"
+                            ar
+                            ar-modes="webxr scene-viewer quick-look"
+                            environment-image="neutral"
+                            auto-rotate
+                            camera-controls
+                            style="width: 100%; height: 350px; background-color: var(--bg-light); border-radius: 12px;">
+                            <button slot="ar-button" class="btn btn-primary-custom position-absolute bottom-0 start-50 translate-middle-x mb-3 shadow">
+                                <i class="fa-solid fa-camera me-2"></i>View in Your Room
+                            </button>
+                        </model-viewer>
+                    </div>
+                <% } else { %>
+                    <div class="resin-card p-4 mt-3">
+                        <h5 class="mb-3"><i class="fa-solid fa-vr-cardboard me-2" style="color: var(--primary-color);"></i>3D / AR Preview</h5>
+                        <model-viewer
+                            src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+                            alt="3D preview placeholder"
+                            ar
+                            ar-modes="webxr scene-viewer quick-look"
+                            environment-image="neutral"
+                            auto-rotate
+                            camera-controls
+                            style="width: 100%; height: 350px; background-color: var(--bg-light); border-radius: 12px;">
+                            <button slot="ar-button" class="btn btn-primary-custom position-absolute bottom-0 start-50 translate-middle-x mb-3 shadow">
+                                <i class="fa-solid fa-camera me-2"></i>View in AR
+                            </button>
+                        </model-viewer>
+                        <p class="text-muted-custom small mt-2 mb-0">*Placeholder 3D model shown. Actual product model will be uploaded by the admin.</p>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Product Info -->
+            <div class="col-lg-6">
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/shop">Shop</a></li>
+                        <li class="breadcrumb-item active"><%= product.name %></li>
+                    </ol>
+                </nav>
+
+                <span class="badge bg-secondary mb-2"><%= product.category_name || 'Uncategorized' %></span>
+                <h1 class="display-6 mb-3"><%= product.name %></h1>
+
+                <!-- Rating -->
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-2">
+                        <% for (let i = 1; i <= 5; i++) { %>
+                            <i class="fa-<%= i <= Math.round(avgRating) ? 'solid' : 'regular' %> fa-star text-warning"></i>
+                        <% } %>
+                    </div>
+                    <span class="text-muted-custom">(<%= reviewCount %> reviews)</span>
+                </div>
+
+                <h2 class="mb-4" style="color: var(--primary-color);">₦<%= Number(product.price).toLocaleString() %></h2>
+
+                <p class="text-muted-custom mb-4"><%= product.description || 'No description available.' %></p>
+
+                <!-- Stock Status -->
+                <div class="mb-4">
+                    <% if (product.stock > 0) { %>
+                        <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>In Stock (<%= product.stock %> available)</span>
+                    <% } else { %>
+                        <span class="badge bg-danger"><i class="fa-solid fa-xmark me-1"></i>Out of Stock</span>
+                    <% } %>
+                </div>
+
+                <!-- Add to Cart -->
+                <% if (product.stock > 0) { %>
+                    <form action="/cart/add" method="POST" class="d-flex align-items-center gap-3 mb-4">
+                        <input type="hidden" name="product_id" value="<%= product.id %>">
+                        <div class="input-group" style="width: 140px;">
+                            <button type="button" class="btn btn-outline-secondary" onclick="changeQty(-1)">-</button>
+                            <input type="number" name="quantity" id="qty" value="1" min="1" max="<%= product.stock %>" class="form-control text-center">
+                            <button type="button" class="btn btn-outline-secondary" onclick="changeQty(1)">+</button>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom btn-lg px-5">
+                            <i class="fa-solid fa-cart-plus me-2"></i>Add to Cart
+                        </button>
+                    </form>
+                <% } %>
+
+                <!-- Features -->
+                <div class="resin-card p-4">
+                    <div class="row g-3">
+                        <div class="col-6 d-flex align-items-center"><i class="fa-solid fa-truck-fast me-2" style="color: var(--primary-color);"></i><small>Free shipping over ₦50,000</small></div>
+                        <div class="col-6 d-flex align-items-center"><i class="fa-solid fa-shield-halved me-2" style="color: var(--primary-color);"></i><small>Secure checkout</small></div>
+                        <div class="col-6 d-flex align-items-center"><i class="fa-solid fa-rotate-left me-2" style="color: var(--primary-color);"></i><small>7-day return policy</small></div>
+                        <div class="col-6 d-flex align-items-center"><i class="fa-solid fa-cube me-2" style="color: var(--primary-color);"></i><small>AR Preview available</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="mt-5">
+            <h3 class="mb-4">Customer Reviews (<%= reviewCount %>)</h3>
+            <div class="row">
+                <div class="col-lg-8">
+                    <% if (reviews.length > 0) { %>
+                        <% reviews.forEach(review => { %>
+                            <div class="resin-card p-4 mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div>
+                                        <strong><%= review.first_name %> <%= review.last_name %></strong>
+                                        <div>
+                                            <% for (let i = 1; i <= 5; i++) { %>
+                                                <i class="fa-<%= i <= review.rating ? 'solid' : 'regular' %> fa-star text-warning small"></i>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted-custom"><%= new Date(review.created_at).toLocaleDateString() %></small>
+                                </div>
+                                <p class="mb-0"><%= review.comment %></p>
+                                <% if (review.image_url) { %>
+                                    <img src="<%= review.image_url %>" alt="Review image" class="mt-2 rounded" style="max-height: 150px;">
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-muted-custom">No reviews yet. Be the first to review this product!</p>
+                    <% } %>
+
+                    <!-- Add Review Form -->
+                    <% if (user) { %>
+                        <div class="resin-card p-4 mt-4">
+                            <h5 class="mb-3">Write a Review</h5>
+                            <form action="/shop/product/<%= product.id %>/review" method="POST" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Rating</label>
+                                    <div id="starRating" class="fs-4">
+                                        <% for (let i = 1; i <= 5; i++) { %>
+                                            <i class="fa-regular fa-star text-warning star-btn" data-rating="<%= i %>" style="cursor: pointer;"></i>
+                                        <% } %>
+                                    </div>
+                                    <input type="hidden" name="rating" id="ratingInput" value="5" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="comment" class="form-label fw-semibold">Your Review</label>
+                                    <textarea class="form-control" name="comment" rows="3" placeholder="Share your experience..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom">Submit Review</button>
+                            </form>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <% if (relatedProducts.length > 0) { %>
+            <div class="mt-5">
+                <h3 class="mb-4">Related Products</h3>
+                <div class="row g-4">
+                    <% relatedProducts.forEach(rp => { %>
+                        <div class="col-md-3">
+                            <div class="resin-card h-100">
+                                <div class="card-img-top-wrapper">
+                                    <% if (rp.image_url) { %>
+                                        <img src="<%= rp.image_url %>" class="card-img-top" alt="<%= rp.name %>">
+                                    <% } else { %>
+                                        <div class="d-flex align-items-center justify-content-center h-100" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); min-height: 150px;">
+                                            <i class="fa-solid fa-gem text-white fs-3"></i>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <div class="p-3 card-body-custom">
+                                    <h6><a href="/shop/product/<%= rp.id %>" style="color: var(--text-dark);"><%= rp.name %></a></h6>
+                                    <span class="fw-bold" style="color: var(--primary-color);">₦<%= Number(rp.price).toLocaleString() %></span>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</section>
+
+
+<script>
+function changeQty(delta) {
+    const input = document.getElementById('qty');
+    let val = parseInt(input.value) + delta;
+    if (val < 1) val = 1;
+    if (val > parseInt(input.max)) val = parseInt(input.max);
+    input.value = val;
+}
+
+document.querySelectorAll('.star-btn').forEach(star => {
+    star.addEventListener('click', function() {
+        const rating = this.dataset.rating;
+        document.getElementById('ratingInput').value = rating;
+        document.querySelectorAll('.star-btn').forEach((s, i) => {
+            s.classList.toggle('fa-solid', i < rating);
+            s.classList.toggle('fa-regular', i >= rating);
+        });
+    });
+});
+</script>

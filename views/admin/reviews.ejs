@@ -1,0 +1,36 @@
+<h2 class="mb-4">Reviews (<%= reviews.length %>)</h2>
+
+<div class="stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>User</th><th>Product</th><th>Rating</th><th>Comment</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+                <% if (reviews.length === 0) { %>
+                    <tr><td colspan="6" class="text-center py-4 text-muted-custom">No reviews yet.</td></tr>
+                <% } %>
+                <% reviews.forEach(r => { %>
+                    <tr>
+                        <td><%= r.first_name %> <%= r.last_name %></td>
+                        <td><%= r.product_name %></td>
+                        <td>
+                            <% for (let i = 1; i <= 5; i++) { %>
+                                <i class="fa-<%= i <= r.rating ? 'solid' : 'regular' %> fa-star text-warning small"></i>
+                            <% } %>
+                        </td>
+                        <td class="text-muted-custom" style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><%= r.comment || '-' %></td>
+                        <td><span class="badge bg-<%= r.status==='approved'?'success':r.status==='rejected'?'danger':'warning' %>"><%= r.status %></span></td>
+                        <td>
+                            <% if (r.status !== 'approved') { %>
+                                <form action="/admin/reviews/approve/<%= r.id %>" method="POST" class="d-inline"><button class="btn btn-sm btn-outline-success me-1" title="Approve"><i class="fa-solid fa-check"></i></button></form>
+                            <% } %>
+                            <% if (r.status !== 'rejected') { %>
+                                <form action="/admin/reviews/reject/<%= r.id %>" method="POST" class="d-inline"><button class="btn btn-sm btn-outline-warning me-1" title="Reject"><i class="fa-solid fa-ban"></i></button></form>
+                            <% } %>
+                            <form action="/admin/reviews/delete/<%= r.id %>" method="POST" class="d-inline" onsubmit="return confirm('Delete?')"><button class="btn btn-sm btn-outline-danger" title="Delete"><i class="fa-solid fa-trash"></i></button></form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+const fs = require('fs');
+let code = fs.readFileSync('routes/admin.js', 'utf8');
+code = code.replace("const { isAdmin } = require('../middlewares/auth');", "const { isAdmin, isStaff } = require('../middlewares/auth');");
+code = code.replace(/\/dashboard', isAdmin/g, "/dashboard', isStaff");
+code = code.replace(/\/products(.*)', isAdmin/g, "/products$1', isStaff");
+code = code.replace(/\/categories(.*)', isAdmin/g, "/categories$1', isStaff");
+code = code.replace(/\/orders(.*)', isAdmin/g, "/orders$1', isStaff");
+code = code.replace(/\/reviews(.*)', isAdmin/g, "/reviews$1', isStaff");
+fs.writeFileSync('routes/admin.js', code);
+console.log('Routes updated.');

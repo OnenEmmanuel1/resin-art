@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title ? title : 'Resin Art E-Commerce' %></title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/base.css">
+    <%- style %>
+</head>
+<body>
+
+    <%- include('../partials/navbar') %>
+
+    <main>
+        <!-- Flash Messages -->
+        <% if (error) { %>
+            <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+                <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+        <% if (success) { %>
+            <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+
+        <%- body %>
+    </main>
+
+    <!-- Floating Cart Button -->
+    <% if (user) { %>
+    <a href="/cart" class="floating-cart" id="floating-cart">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span class="badge rounded-pill bg-danger" id="floating-cart-count">
+            <%= cartCount %>
+        </span>
+    </a>
+    <% } %>
+
+    <%- include('../partials/footer') %>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Model-Viewer for AR -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    
+    <!-- Socket.IO -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        const isLoggedIn = <%= user ? 'true' : 'false' %>;
+
+        // Initialize theme: Force light if guest, otherwise respect localStorage
+        let currentTheme = 'light';
+        if (isLoggedIn) {
+            currentTheme = localStorage.getItem('theme') || 'light';
+        } else {
+            localStorage.removeItem('theme'); // Clear any residual theme
+        }
+        
+        htmlElement.setAttribute('data-theme', currentTheme);
+
+        if (themeToggle) {
+            updateIcon(currentTheme);
+            themeToggle.addEventListener('click', () => {
+                const newTheme = htmlElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+                applyTheme(newTheme);
+                updateIcon(newTheme);
+            });
+        }
+
+        function applyTheme(theme) {
+            if (!isLoggedIn) return;
+            htmlElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+
+        function updateIcon(theme) {
+            if (!themeToggle) return;
+            if (theme === 'dark') {
+                themeToggle.innerHTML = '<i class="fa-solid fa-sun me-2"></i>Switch to Light Mode';
+            } else {
+                themeToggle.innerHTML = '<i class="fa-solid fa-moon me-2"></i>Switch to Dark Mode';
+            }
+        }
+    </script>
+
+    <!-- Main JS -->
+    <script src="/js/main.js"></script>
+    <%- script %>
+</body>
+</html>

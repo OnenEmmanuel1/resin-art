@@ -1,0 +1,45 @@
+<section class="py-5" style="margin-top: 80px;">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-5 mb-0">Notifications</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="resin-card p-4">
+                    <% if (notifications.length === 0) { %>
+                        <div class="text-center py-5">
+                            <i class="fa-regular fa-bell fs-1 text-muted-custom mb-3"></i>
+                            <h4>No Notifications Yet</h4>
+                            <p class="text-muted-custom">You're all caught up!</p>
+                        </div>
+                    <% } else { %>
+                        <div class="list-group list-group-flush">
+                            <% notifications.forEach(note => { %>
+                                <div class="list-group-item px-0 py-3 d-flex align-items-start border-bottom">
+                                    <div class="me-3 mt-1">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(139,92,246,0.1);">
+                                            <i class="fa-solid fa-bell" style="color: var(--primary-color);"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <h6 class="mb-0 <%= note.is_read ? 'text-muted-custom' : 'fw-bold' %>">System Update</h6>
+                                            <small class="text-muted-custom"><%= new Date(note.created_at).toLocaleString() %></small>
+                                        </div>
+                                        <p class="mb-0 <%= note.is_read ? 'text-muted-custom' : '' %>"><%= note.message %></p>
+                                    </div>
+                                    <% if (!note.is_read) { %>
+                                        <div class="ms-3 align-self-center">
+                                            <span class="badge bg-primary rounded-pill" style="width: 10px; height: 10px; padding: 0;">&nbsp;</span>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

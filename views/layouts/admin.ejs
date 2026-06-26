@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title %> | Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <%- include('../partials/admin-sidebar') %>
+        <div class="admin-content">
+            <nav class="navbar sticky-top px-4">
+                <button class="btn d-lg-none" id="sidebarToggle"><i class="fa-solid fa-bars fs-5"></i></button>
+                <span class="navbar-brand ms-2"><%- title %></span>
+                <div class="d-flex align-items-center gap-3">
+                    <button id="theme-toggle" aria-label="Toggle Dark Mode"><i class="fa-solid fa-moon"></i></button>
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="fa-regular fa-user"></i> <%= user.first_name %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/"><i class="fa-solid fa-globe me-2"></i>View Site</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <div class="p-4">
+                <% if (error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert"><%= error %><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+                <% } %>
+                <% if (success) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert"><%= success %><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+                <% } %>
+                <%- body %>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        const themeIcon = themeToggle ? themeToggle.querySelector('i') : null;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        htmlElement.setAttribute('data-theme', savedTheme);
+        if(themeIcon && savedTheme==='dark'){themeIcon.classList.remove('fa-moon');themeIcon.classList.add('fa-sun');}
+        if(themeToggle){themeToggle.addEventListener('click',()=>{const c=htmlElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';htmlElement.setAttribute('data-theme',n);localStorage.setItem('theme',n);if(themeIcon){themeIcon.classList.toggle('fa-moon');themeIcon.classList.toggle('fa-sun');}});}
+        document.getElementById('sidebarToggle')?.addEventListener('click',()=>{document.querySelector('.admin-sidebar').classList.toggle('show');});
+    </script>
+</body>
+</html>

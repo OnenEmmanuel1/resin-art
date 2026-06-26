@@ -1,0 +1,22 @@
+
+
+/* Pagination */
+.page-link {
+  background-color: var(--card-bg);
+  color: var(--text-dark);
+  border-color: var(--border-color);
+}
+
+.page-item.active .page-link {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Breadcrumb */
+.breadcrumb-item a {
+  color: var(--primary-color);
+}
+
+/* Product Detail Zoom */
+#mainImage { transition: transform 0.3s ease; }
+#mainImage.zoomed { transform: scale(1.5); transition: transform 0.3s ease; }

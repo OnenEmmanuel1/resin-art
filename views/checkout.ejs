@@ -1,0 +1,71 @@
+<section class="py-5" style="margin-top: 80px;">
+    <div class="container">
+        <h1 class="display-5 mb-4">Checkout</h1>
+        <form action="/orders/place" method="POST" id="checkoutForm">
+            <div class="row">
+                <div class="col-lg-7 mb-4">
+                    <div class="resin-card p-4 mb-4">
+                        <h4 class="mb-3"><i class="fa-solid fa-location-dot me-2"></i>Shipping Address</h4>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Full Address</label>
+                            <textarea class="form-control" name="shipping_address" rows="3" placeholder="Street, City, State, Country" required></textarea>
+                        </div>
+                    </div>
+                    <div class="resin-card p-4">
+                        <h4 class="mb-3"><i class="fa-solid fa-box me-2"></i>Order Items</h4>
+                        <% cartItems.forEach(item => { %>
+                            <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <% if (item.image_url) { %>
+                                        <img src="<%= item.image_url %>" alt="" class="rounded me-3" style="width:50px;height:50px;object-fit:cover">
+                                    <% } %>
+                                    <div><strong><%= item.name %></strong><br><small class="text-muted-custom">Qty: <%= item.quantity %></small></div>
+                                </div>
+                                <strong>₦<%= (item.price * item.quantity).toLocaleString() %></strong>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="resin-card p-4">
+                        <h4 class="mb-4">Payment Summary</h4>
+                        <div class="d-flex justify-content-between mb-2"><span class="text-muted-custom">Subtotal</span><span>₦<%= Number(cartTotal).toLocaleString() %></span></div>
+                        <div class="d-flex justify-content-between mb-2"><span class="text-muted-custom">VAT (7.5%)</span><span>₦<%= Number(tax).toLocaleString() %></span></div>
+                        <div class="d-flex justify-content-between mb-3"><span class="text-muted-custom">Shipping</span><span><%= shipping === 0 ? 'FREE' : '₦' + Number(shipping).toLocaleString() %></span></div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-4"><strong class="fs-5">Grand Total</strong><strong class="fs-5" style="color:var(--primary-color)">₦<%= Number(grandTotal).toLocaleString() %></strong></div>
+                        <input type="hidden" name="payment_reference" id="paymentRef">
+                        <button type="button" id="payBtn" class="btn btn-primary-custom w-100 py-3 fs-5">
+                            <i class="fa-solid fa-credit-card me-2"></i>Pay ₦<%= Number(grandTotal).toLocaleString() %>
+                        </button>
+                        <p class="text-muted-custom small text-center mt-3"><i class="fa-solid fa-shield-halved me-1"></i>Secured by Paystack</p>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script>
+document.getElementById('payBtn').addEventListener('click', function() {
+    const address = document.querySelector('[name="shipping_address"]').value;
+    if (!address.trim()) { alert('Please enter a shipping address.'); return; }
+
+    const handler = PaystackPop.setup({
+        key: 'pk_test_xxxxxxxxxxxxxxxxxxxxx',
+        email: '<%= user.email %>',
+        amount: <%= Math.round(grandTotal * 100) %>,
+        currency: 'NGN',
+        ref: 'RESIN-' + Date.now() + Math.floor(Math.random() * 1000),
+        callback: function(response) {
+            document.getElementById('paymentRef').value = response.reference;
+            document.getElementById('checkoutForm').submit();
+        },
+        onClose: function() {
+            alert('Payment window closed. You can try again.');
+        }
+    });
+    handler.openIframe();
+});
+</script>

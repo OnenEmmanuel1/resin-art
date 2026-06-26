@@ -1,0 +1,109 @@
+<link rel="stylesheet" href="/css/profile.css">
+
+<section class="py-5" style="margin-top: 80px;">
+    <div class="container">
+        <h1 class="display-5 mb-4">My Profile</h1>
+        
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="resin-card p-4">
+                    <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+                        <div class="profile-img-wrapper">
+                            <% if (profile.profile_image) { %>
+                                <img src="<%= profile.profile_image %>" alt="Profile" class="profile-img-large">
+                            <% } else { %>
+                                <div class="profile-img-placeholder">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="flex-grow-1 text-center text-md-start">
+                            <h3 class="mb-1"><%= profile.first_name %> <%= profile.last_name %></h3>
+                            <p class="text-muted-custom mb-3"><%= profile.email %></p>
+                            
+                            <form action="/profile/upload-image" method="POST" enctype="multipart/form-data" class="d-flex flex-column flex-md-row gap-2 align-items-center">
+                                <div class="input-group input-group-sm" style="max-width: 300px;">
+                                    <input type="file" class="form-control" name="profile_image" accept="image/*" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom btn-sm px-3">
+                                    <i class="fa-solid fa-camera me-1"></i> Update Picture
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="resin-card p-4">
+                    <h4 class="mb-4"><i class="fa-solid fa-gears me-2"></i>Account Settings</h4>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="mb-0">Theme Preference</h6>
+                            <p class="text-muted-custom small mb-0">Switch between light and dark mode for your account</p>
+                        </div>
+                        <button id="theme-toggle" class="btn btn-outline-custom px-4">
+                            <i class="fa-solid fa-moon me-2"></i>Toggle Dark Mode
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="resin-card p-4">
+                    <h4 class="mb-4"><i class="fa-regular fa-id-badge me-2"></i>Personal Information</h4>
+                    <form action="/profile/update" method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">First Name</label>
+                                <input type="text" class="form-control" name="first_name" value="<%= profile.first_name %>" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Last Name</label>
+                                <input type="text" class="form-control" name="last_name" value="<%= profile.last_name %>" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" class="form-control" value="<%= profile.email %>" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Phone</label>
+                            <input type="tel" class="form-control" name="phone" value="<%= profile.phone || '' %>" placeholder="+234...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Address</label>
+                            <textarea class="form-control" name="address" rows="3" placeholder="Delivery address"><%= profile.address || '' %></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom px-4">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="resin-card p-4">
+                    <h4 class="mb-4"><i class="fa-solid fa-lock me-2"></i>Change Password</h4>
+                    <form action="/profile/change-password" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Current Password</label>
+                            <input type="password" class="form-control" name="current_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">New Password</label>
+                            <input type="password" class="form-control" name="new_password" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Confirm New Password</label>
+                            <input type="password" class="form-control" name="confirm_password" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn btn-outline-custom px-4">Update Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

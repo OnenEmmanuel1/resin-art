@@ -1,0 +1,357 @@
+<link rel="stylesheet" href="/css/home.css">
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-blob"></div>
+    <div class="hero-blob-2"></div>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0 text-center text-lg-start z-1">
+                <span class="badge rounded-pill px-3 py-2 mb-3"
+                    style="background: rgba(139,92,246,0.15); color: var(--primary-color); font-size: 0.85rem;">
+                    <i class="fa-solid fa-sparkles me-1"></i> AR-Powered Shopping
+                </span>
+                <h1 class="display-3 fw-bold mb-4">Bring Art to Life with <span
+                        style="background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AR
+                        Preview</span></h1>
+                <p class="lead mb-5 text-muted-custom pe-lg-5">
+                    Discover handcrafted resin art, personalized gifts, and elegant home decor. Visualize them in your
+                    space before you buy using our Augmented Reality feature.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+                    <a href="/shop" class="btn btn-primary-custom btn-lg px-5">Shop Now <i
+                            class="fa-solid fa-arrow-right ms-2"></i></a>
+                    <a href="#ar-demo" class="btn btn-outline-custom btn-lg px-5">Try AR Demo <i
+                            class="fa-solid fa-cube ms-2"></i></a>
+                </div>
+                <div class="d-flex gap-4 mt-5 justify-content-center justify-content-lg-start">
+                    <div>
+                        <h4 class="mb-0" style="color: var(--primary-color);">500+</h4><small
+                            class="text-muted-custom">Happy Customers</small>
+                    </div>
+                    <div class="border-start ps-4">
+                        <h4 class="mb-0" style="color: var(--primary-color);">50+</h4><small
+                            class="text-muted-custom">Unique Designs</small>
+                    </div>
+                    <div class="border-start ps-4">
+                        <h4 class="mb-0" style="color: var(--primary-color);">4.9★</h4><small
+                            class="text-muted-custom">Avg Rating</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 position-relative z-1">
+                <div class="position-relative">
+                    <img src="https://images.unsplash.com/photo-1607752312075-3d4a7fa7c9ae?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        alt="Resin Art Tray" class="img-fluid rounded-4 shadow-lg"
+                        style="border: 4px solid var(--card-bg);">
+                    <div class="position-absolute top-0 end-0 mt-4 me-4 bg-white text-dark px-3 py-2 rounded-pill shadow-lg d-flex align-items-center gap-2"
+                        style="animation: float 3s ease-in-out infinite;">
+                        <i class="fa-solid fa-camera text-primary"></i> <span>View in your room</span>
+                    </div>
+                    <div class="position-absolute bottom-0 start-0 ms-4 mb-4 bg-white text-dark px-3 py-2 rounded-3 shadow-lg"
+                        style="animation: float 4s ease-in-out infinite 1s;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <span class="fw-semibold">Handcrafted with love</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="display-6 mb-1">Featured Resin Art</h2>
+                <p class="text-muted-custom mb-0">Our latest handcrafted creations</p>
+            </div>
+            <a href="/shop" class="btn btn-outline-custom d-none d-md-inline-block">View All <i
+                    class="fa-solid fa-arrow-right ms-2"></i></a>
+        </div>
+
+        <div class="row g-4">
+            <% if (typeof featuredProducts !=='undefined' && featuredProducts.length> 0) { %>
+                <% featuredProducts.slice(0, 8).forEach(product=> { %>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="resin-card h-100">
+                            <div class="card-img-top-wrapper">
+                                <% if (product.image_url) { %>
+                                    <img src="<%= product.image_url %>" class="card-img-top" alt="<%= product.name %>">
+                                    <% } else { %>
+                                        <div class="d-flex align-items-center justify-content-center h-100"
+                                            style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); min-height: 200px;">
+                                            <i class="fa-solid fa-gem text-white fs-1"></i>
+                                        </div>
+                                        <% } %>
+                                            <span class="ar-badge"><i class="fa-solid fa-cube"></i> AR</span>
+                            </div>
+                            <div class="p-3 card-body-custom">
+                                <p class="text-muted-custom small mb-1">
+                                    <%= product.category_name || 'Resin Art' %>
+                                </p>
+                                <h6 class="mb-2"><a href="/shop/product/<%= product.id %>"
+                                        style="color: var(--text-dark);">
+                                        <%= product.name %>
+                                    </a></h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold" style="color: var(--primary-color);">₦<%=
+                                            Number(product.price).toLocaleString() %></span>
+                                    <form action="/cart/add" method="POST" class="d-inline">
+                                        <input type="hidden" name="product_id" value="<%= product.id %>">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-primary-custom btn-sm"><i
+                                                class="fa-solid fa-cart-plus"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <div class="col-12 text-center py-5">
+                                <p class="text-muted-custom">Products coming soon!</p>
+                            </div>
+                            <% } %>
+        </div>
+        <div class="text-center mt-4 d-md-none">
+            <a href="/shop" class="btn btn-outline-custom">View All Products <i
+                    class="fa-solid fa-arrow-right ms-2"></i></a>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="py-5 bg-card">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h2 class="display-6">Shop by Category</h2>
+            <div class="mx-auto mt-3" style="width: 60px; height: 3px; background-color: var(--primary-color);"></div>
+        </div>
+        <div class="row g-4">
+            <% const
+                catImages=[ 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                , 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                , 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                , 'https://images.unsplash.com/photo-1630628123261-72dd7c75bc02?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+                , 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                , 'https://images.unsplash.com/photo-1558171813-4c088753af8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                ]; %>
+                <% if (typeof categories !=='undefined' ) { %>
+                    <% categories.forEach((cat, i)=> { %>
+                        <div class="col-md-4 col-lg-2">
+                            <a href="/shop?category=<%= cat.id %>" class="text-decoration-none">
+                                <div class="resin-card text-center pb-3">
+                                    <div class="card-img-top-wrapper" style="aspect-ratio: 1;">
+                                        <img src="<%= catImages[i] || catImages[0] %>" class="card-img-top"
+                                            alt="<%= cat.name %>">
+                                    </div>
+                                    <h6 class="mt-3 mb-0 px-2" style="color: var(--text-dark);">
+                                        <%= cat.name %>
+                                    </h6>
+                                </div>
+                            </a>
+                        </div>
+                        <% }) %>
+                            <% } %>
+        </div>
+    </div>
+</section>
+
+<!-- AR Demo Section -->
+<section id="ar-demo" class="py-5">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-5 mb-5 mb-lg-0 order-2 order-lg-1">
+                <span class="badge rounded-pill px-3 py-2 mb-3"
+                    style="background: rgba(236,72,153,0.15); color: var(--secondary-color);">
+                    <i class="fa-solid fa-vr-cardboard me-1"></i> Augmented Reality
+                </span>
+                <h2 class="display-5 mb-4">Try it in your space before buying</h2>
+                <p class="text-muted-custom mb-4">
+                    Not sure if that ocean blue tray matches your coffee table? Use our Augmented Reality feature to
+                    project the item directly into your living room using your smartphone camera.
+                </p>
+                <ul class="list-unstyled mb-5">
+                    <li class="mb-3 d-flex align-items-center"><i
+                            class="fa-solid fa-check-circle text-success me-3 fs-5"></i> <span>100% accurate
+                            sizing</span></li>
+                    <li class="mb-3 d-flex align-items-center"><i
+                            class="fa-solid fa-check-circle text-success me-3 fs-5"></i> <span>Rotate, zoom, and move
+                            freely</span></li>
+                    <li class="mb-3 d-flex align-items-center"><i
+                            class="fa-solid fa-check-circle text-success me-3 fs-5"></i> <span>Works on iOS &
+                            Android</span></li>
+                    <li class="d-flex align-items-center"><i
+                            class="fa-solid fa-check-circle text-success me-3 fs-5"></i> <span>No app download
+                            required</span></li>
+                </ul>
+                <a href="/shop" class="btn btn-primary-custom px-5">Browse AR Products</a>
+            </div>
+            <div class="col-lg-7 order-1 order-lg-2 mb-5 mb-lg-0 text-center">
+                <div class="p-4 bg-card rounded-4 border shadow-sm position-relative">
+                    <div class="ar-badge"><i class="fa-solid fa-vr-cardboard"></i> Interactive 3D</div>
+                    <model-viewer src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+                        ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz" alt="3D Model Preview" ar
+                        ar-modes="webxr scene-viewer quick-look" environment-image="neutral" auto-rotate camera-controls
+                        style="width: 100%; height: 400px; background-color: var(--bg-light); border-radius: 12px;">
+                        <button slot="ar-button"
+                            class="btn btn-primary-custom position-absolute bottom-0 start-50 translate-middle-x mb-3 shadow">
+                            <i class="fa-solid fa-camera me-2"></i> View in AR
+                        </button>
+                    </model-viewer>
+                    <p class="text-muted-custom small mt-3 mb-0">*Demo 3D model. Each product has its own AR preview.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="py-5 bg-card">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h2 class="display-6">Why Choose ResinArt AR</h2>
+            <div class="mx-auto mt-3" style="width: 60px; height: 3px; background-color: var(--primary-color);"></div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4 col-lg-2 offset-lg-1">
+                <div class="text-center">
+                    <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-circle"
+                        style="width: 70px; height: 70px; background: rgba(139,92,246,0.1);">
+                        <i class="fa-solid fa-hand-sparkles fs-3" style="color: var(--primary-color);"></i>
+                    </div>
+                    <h6>Handcrafted</h6>
+                    <small class="text-muted-custom">Each piece is uniquely made by hand</small>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="text-center">
+                    <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-circle"
+                        style="width: 70px; height: 70px; background: rgba(236,72,153,0.1);">
+                        <i class="fa-solid fa-vr-cardboard fs-3" style="color: var(--secondary-color);"></i>
+                    </div>
+                    <h6>AR Preview</h6>
+                    <small class="text-muted-custom">See products in your space</small>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="text-center">
+                    <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-circle"
+                        style="width: 70px; height: 70px; background: rgba(245,158,11,0.1);">
+                        <i class="fa-solid fa-truck-fast fs-3" style="color: var(--accent-color);"></i>
+                    </div>
+                    <h6>Fast Delivery</h6>
+                    <small class="text-muted-custom">Safe nationwide shipping</small>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="text-center">
+                    <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-circle"
+                        style="width: 70px; height: 70px; background: rgba(34,197,94,0.1);">
+                        <i class="fa-solid fa-shield-halved fs-3 text-success"></i>
+                    </div>
+                    <h6>Secure Payment</h6>
+                    <small class="text-muted-custom">Paystack encrypted checkout</small>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="text-center">
+                    <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-circle"
+                        style="width: 70px; height: 70px; background: rgba(59,130,246,0.1);">
+                        <i class="fa-solid fa-rotate-left fs-3 text-info"></i>
+                    </div>
+                    <h6>Easy Returns</h6>
+                    <small class="text-muted-custom">7-day return policy</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h2 class="display-6">What Our Customers Say</h2>
+            <div class="mx-auto mt-3" style="width: 60px; height: 3px; background-color: var(--primary-color);"></div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="resin-card p-4 h-100">
+                    <div class="mb-3">
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                    </div>
+                    <p class="text-muted-custom mb-4">"The AR feature is amazing! I was able to see exactly how the
+                        ocean tray would look on my dining table before ordering. It arrived even more beautiful in
+                        person."</p>
+                    <div class="d-flex align-items-center">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
+                            class="rounded-circle me-3" style="width:45px;height:45px;object-fit:cover" alt="">
+                        <div><strong>Chioma A.</strong><br><small class="text-muted-custom">Lagos, Nigeria</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="resin-card p-4 h-100">
+                    <div class="mb-3">
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                    </div>
+                    <p class="text-muted-custom mb-4">"I ordered a custom resin keyholder as a wedding gift. The quality
+                        is outstanding and the delivery was incredibly fast. Highly recommended!"</p>
+                    <div class="d-flex align-items-center">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
+                            class="rounded-circle me-3" style="width:45px;height:45px;object-fit:cover" alt="">
+                        <div><strong>Emeka O.</strong><br><small class="text-muted-custom">Abuja, Nigeria</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="resin-card p-4 h-100">
+                    <div class="mb-3">
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-solid fa-star text-warning"></i>
+                        <i class="fa-regular fa-star text-warning"></i>
+                    </div>
+                    <p class="text-muted-custom mb-4">"Beautiful wall art that transforms my living room. The resin work
+                        is intricate and the colours are vibrant. The AR preview was spot on!"</p>
+                    <div class="d-flex align-items-center">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
+                            class="rounded-circle me-3" style="width:45px;height:45px;object-fit:cover" alt="">
+                        <div><strong>Ngozi E.</strong><br><small class="text-muted-custom">Port Harcourt,
+                                Nigeria</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="py-5">
+    <div class="container">
+        <div class="rounded-4 p-5 text-center text-white position-relative overflow-hidden"
+            style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+            <div class="position-relative z-1">
+                <h2 class="display-6 fw-bold mb-3">Ready to Transform Your Space?</h2>
+                <p class="lead mb-4 opacity-75">Browse our collection and preview with AR before you buy.</p>
+                <a href="/shop" class="btn btn-light btn-lg px-5 fw-semibold">Shop Now <i
+                        class="fa-solid fa-arrow-right ms-2"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
