@@ -1,0 +1,72 @@
+# Dependencies
+node_modules/
+jspm_packages/
+web_modules/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Uploads & User Generated Content
+uploads/*
+!uploads/.gitkeep
+
+# Logs & Debug
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# Runtime data & temp files
+pids
+*.pid
+*.seed
+*.pid.lock
+*.tmp
+*.temp
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Editor / IDE directories and files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Testing & Cache
+.npm
+.eslintcache
+.stylelintcache
+.node_repl_history
+*.tgz
+
+# Build / Output directories
+dist/
+build/
+out/
