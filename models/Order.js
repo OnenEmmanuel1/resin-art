@@ -21,6 +21,32 @@ const Order = {
         return rows[0];
     },
 
+    async findByTrackingNumber(trackingNumber) {
+        if (!trackingNumber) return null;
+        const [rows] = await db.query(
+            `SELECT o.*, u.first_name, u.last_name, u.email, u.phone 
+             FROM orders o 
+             JOIN users u ON o.user_id = u.id 
+             WHERE o.delivery_tracking_number = ?`,
+            [trackingNumber.trim()]
+        );
+        return rows[0];
+    },
+
+    async findByOrderOrTracking(query) {
+        if (!query) return null;
+        const clean = query.toString().trim().replace(/^#/, '');
+        const orderIdNum = parseInt(clean, 10);
+        const [rows] = await db.query(
+            `SELECT o.*, u.first_name, u.last_name, u.email, u.phone 
+             FROM orders o 
+             JOIN users u ON o.user_id = u.id 
+             WHERE o.delivery_tracking_number = ? OR o.id = ?`,
+            [clean, isNaN(orderIdNum) ? -1 : orderIdNum]
+        );
+        return rows[0];
+    },
+
     async getItems(orderId) {
         const [rows] = await db.query(
             `SELECT oi.*, p.name, p.image_url FROM order_items oi 

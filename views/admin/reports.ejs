@@ -1,0 +1,546 @@
+<div class="reports-container">
+    <!-- Header with Action Buttons -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="mb-1" style="font-family:'Playfair Display', serif; font-weight:700;">
+                <i class="fa-solid fa-chart-pie me-2 text-primary"></i>Sales & Inventory Analytics
+            </h2>
+            <p class="text-muted-custom mb-0">Real-time stock valuation, sales performance, and inventory audit logs</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-custom" onclick="window.print()">
+                <i class="fa-solid fa-print me-1"></i>Print Report
+            </button>
+            <a href="/admin/reports/export-csv" class="btn btn-outline-custom">
+                <i class="fa-solid fa-file-csv me-1"></i>Export CSV
+            </a>
+            <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#adjustStockModal">
+                <i class="fa-solid fa-boxes-packing me-1"></i>Adjust Stock
+            </button>
+        </div>
+    </div>
+
+    <!-- Executive KPI Summary Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Total Revenue -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card h-100 position-relative overflow-hidden">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-muted-custom small fw-semibold text-uppercase">Total Sales Revenue</span>
+                        <h3 class="mt-2 mb-1 fw-bold" style="color: var(--primary-color);">₦<%= salesSummary.total_revenue.toLocaleString() %></h3>
+                        <small class="text-muted-custom">
+                            <i class="fa-solid fa-check-circle text-success me-1"></i><%= salesSummary.total_orders %> Paid Orders
+                        </small>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">
+                        <i class="fa-solid fa-sack-dollar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Units Sold & AOV -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card h-100 position-relative overflow-hidden">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-muted-custom small fw-semibold text-uppercase">Total Units Sold</span>
+                        <h3 class="mt-2 mb-1 fw-bold"><%= salesSummary.total_units_sold %> <small class="fs-6 text-muted-custom">units</small></h3>
+                        <small class="text-muted-custom">
+                            Avg Order: <strong>₦<%= Math.round(salesSummary.average_order_value).toLocaleString() %></strong>
+                        </small>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Valuation -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card h-100 position-relative overflow-hidden">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-muted-custom small fw-semibold text-uppercase">Stock Asset Value</span>
+                        <h3 class="mt-2 mb-1 fw-bold" style="color: #ec4899;">₦<%= inventorySummary.stock_valuation.toLocaleString() %></h3>
+                        <small class="text-muted-custom">
+                            <i class="fa-solid fa-boxes-stacked me-1"></i><%= inventorySummary.total_stock_units %> Units in Storage
+                        </small>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(236, 72, 153, 0.15); color: #ec4899;">
+                        <i class="fa-solid fa-vault"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Health & Alerts -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card h-100 position-relative overflow-hidden">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-muted-custom small fw-semibold text-uppercase">Inventory Status</span>
+                        <h3 class="mt-2 mb-1 fw-bold"><%= inventorySummary.total_products %> <small class="fs-6 text-muted-custom">products</small></h3>
+                        <div class="d-flex gap-2 align-items-center mt-1">
+                            <% if (inventorySummary.low_stock_count > 0 || inventorySummary.out_of_stock_count > 0) { %>
+                                <span class="badge bg-danger"><%= inventorySummary.out_of_stock_count %> Out</span>
+                                <span class="badge bg-warning text-dark"><%= inventorySummary.low_stock_count %> Low</span>
+                            <% } else { %>
+                                <span class="badge bg-success">100% Healthy</span>
+                            <% } %>
+                            <span class="badge bg-success"><%= inventorySummary.healthy_stock_count %> Healthy</span>
+                        </div>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Analytics Section -->
+    <div class="row g-4 mb-4">
+        <!-- Sales Trend Line Chart -->
+        <div class="col-lg-8">
+            <div class="stat-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-bold"><i class="fa-solid fa-arrow-trend-up me-2 text-primary"></i>Revenue Trend (Last 14 Days)</h5>
+                    <span class="badge bg-primary-subtle text-primary">Daily Analytics</span>
+                </div>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="salesTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Stock Share Donut Chart -->
+        <div class="col-lg-4">
+            <div class="stat-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-bold"><i class="fa-solid fa-pie-chart me-2 text-secondary"></i>Stock by Category</h5>
+                    <small class="text-muted-custom"><%= categoryStock.length %> Categories</small>
+                </div>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="categoryStockChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products Leaderboard & Category Stock Table -->
+    <div class="row g-4 mb-4">
+        <!-- Top Best Selling Products -->
+        <div class="col-lg-6">
+            <div class="stat-card h-100">
+                <h5 class="mb-3 fw-bold"><i class="fa-solid fa-crown me-2 text-warning"></i>Top Selling Products</h5>
+                <% if (topSelling && topSelling.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th class="text-center">Units Sold</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% topSelling.forEach((item, index) => { %>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge rounded-pill bg-light text-dark fw-bold" style="width:24px;"><%= index + 1 %></span>
+                                                <% if (item.image_url) { %>
+                                                    <img src="<%= item.image_url %>" alt="" class="rounded" style="width:36px;height:36px;object-fit:cover;">
+                                                <% } %>
+                                                <div class="fw-semibold text-truncate" style="max-width:180px;"><%= item.name %></div>
+                                            </div>
+                                        </td>
+                                        <td><span class="text-muted-custom small"><%= item.category_name || 'General' %></span></td>
+                                        <td class="text-center"><span class="badge bg-primary px-2 py-1"><%= item.units_sold %></span></td>
+                                        <td class="text-end fw-bold" style="color:var(--primary-color);">₦<%= item.revenue.toLocaleString() %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <p class="text-muted-custom text-center py-4 mb-0">No sales recorded yet.</p>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Category Valuation Breakdown -->
+        <div class="col-lg-6">
+            <div class="stat-card h-100">
+                <h5 class="mb-3 fw-bold"><i class="fa-solid fa-layer-group me-2 text-info"></i>Category Valuation Breakdown</h5>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th class="text-center">Products</th>
+                                <th class="text-center">Units</th>
+                                <th class="text-end">Asset Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% categoryStock.forEach(cat => { %>
+                                <tr>
+                                    <td class="fw-semibold"><%= cat.category_name %></td>
+                                    <td class="text-center"><%= cat.product_count %></td>
+                                    <td class="text-center"><span class="badge bg-secondary"><%= cat.total_units %></span></td>
+                                    <td class="text-end fw-bold">₦<%= cat.total_value.toLocaleString() %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Stock Management Table with Filters -->
+    <div class="stat-card mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+            <div>
+                <h5 class="mb-1 fw-bold"><i class="fa-solid fa-warehouse me-2 text-primary"></i>Comprehensive Product Inventory</h5>
+                <p class="text-muted-custom small mb-0">Detailed stock levels, sales turnover, and value per product</p>
+            </div>
+            
+            <!-- Filters Form -->
+            <form action="/admin/reports" method="GET" class="d-flex flex-wrap gap-2 align-items-center">
+                <div class="input-group input-group-sm" style="width: 200px;">
+                    <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search..." value="<%= filters.search %>">
+                </div>
+
+                <select name="category_id" class="form-select form-select-sm" style="width: 150px;" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    <% categories.forEach(c => { %>
+                        <option value="<%= c.id %>" <%= filters.category_id == c.id ? 'selected' : '' %>><%= c.name %></option>
+                    <% }) %>
+                </select>
+
+                <select name="stock_status" class="form-select form-select-sm" style="width: 140px;" onchange="this.form.submit()">
+                    <option value="">All Stock</option>
+                    <option value="healthy" <%= filters.stock_status === 'healthy' ? 'selected' : '' %>>Healthy (> 5)</option>
+                    <option value="low" <%= filters.stock_status === 'low' ? 'selected' : '' %>>Low Stock (1-5)</option>
+                    <option value="out" <%= filters.stock_status === 'out' ? 'selected' : '' %>>Out of Stock (0)</option>
+                </select>
+
+                <% if (filters.search || filters.category_id || filters.stock_status) { %>
+                    <a href="/admin/reports" class="btn btn-sm btn-outline-secondary">Reset</a>
+                <% } %>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Unit Price</th>
+                        <th>Stock Level</th>
+                        <th>Inventory Value</th>
+                        <th>Units Sold</th>
+                        <th>Stock Health</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (detailedProducts && detailedProducts.length > 0) { %>
+                        <% detailedProducts.forEach(p => { %>
+                            <tr>
+                                <td class="text-muted-custom small">#<%= p.id %></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <% if (p.image_url) { %>
+                                            <img src="<%= p.image_url %>" alt="" class="rounded" style="width:40px;height:40px;object-fit:cover;">
+                                        <% } else { %>
+                                            <div class="rounded bg-light d-flex align-items-center justify-content-center text-muted" style="width:40px;height:40px;">
+                                                <i class="fa-solid fa-image"></i>
+                                            </div>
+                                        <% } %>
+                                        <div>
+                                            <div class="fw-semibold"><%= p.name %></div>
+                                            <small class="text-muted-custom"><%= p.status %></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-light text-dark"><%= p.category_name || 'None' %></span></td>
+                                <td class="fw-semibold">₦<%= Number(p.price).toLocaleString() %></td>
+                                <td>
+                                    <span class="fw-bold fs-6"><%= p.stock %></span>
+                                    <small class="text-muted-custom">units</small>
+                                </td>
+                                <td class="fw-bold" style="color:var(--primary-color);">₦<%= Number(p.inventory_value).toLocaleString() %></td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary"><%= p.units_sold %> sold</span>
+                                </td>
+                                <td>
+                                    <% if (p.stock === 0) { %>
+                                        <span class="badge bg-danger"><i class="fa-solid fa-circle-xmark me-1"></i>Out of Stock</span>
+                                    <% } else if (p.stock <= 5) { %>
+                                        <span class="badge bg-warning text-dark"><i class="fa-solid fa-triangle-exclamation me-1"></i>Low (<%= p.stock %>)</span>
+                                    <% } else { %>
+                                        <span class="badge bg-success"><i class="fa-solid fa-circle-check me-1"></i>In Stock</span>
+                                    <% } %>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-custom" onclick="openAdjustModal(<%= p.id %>, '<%= p.name.replace(/'/g, "\\'") %>', <%= p.stock %>)">
+                                        <i class="fa-solid fa-sliders me-1"></i>Adjust
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted-custom">No matching products found.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Inventory Audit Trail / Recent Stock Movements -->
+    <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="mb-1 fw-bold"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Stock Movement Audit Trail</h5>
+                <p class="text-muted-custom small mb-0">Logged transactions: restocks, deductions, sales, and manual adjustments</p>
+            </div>
+            <span class="badge bg-light text-muted-custom">Last <%= movements.length %> entries</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th class="text-center">Type</th>
+                        <th class="text-center">Quantity</th>
+                        <th>Reason / Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (movements && movements.length > 0) { %>
+                        <% movements.forEach(m => { %>
+                            <tr>
+                                <td class="small text-muted-custom">
+                                    <%= new Date(m.created_at).toLocaleDateString('en-NG', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' }) %>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <% if (m.image_url) { %>
+                                            <img src="<%= m.image_url %>" alt="" class="rounded" style="width:30px;height:30px;object-fit:cover;">
+                                        <% } %>
+                                        <span class="fw-semibold"><%= m.product_name %></span>
+                                    </div>
+                                </td>
+                                <td><span class="text-muted-custom small"><%= m.category_name || 'General' %></span></td>
+                                <td class="text-center">
+                                    <% if (m.type === 'in') { %>
+                                        <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-arrow-down me-1"></i>Stock IN</span>
+                                    <% } else { %>
+                                        <span class="badge bg-danger-subtle text-danger"><i class="fa-solid fa-arrow-up me-1"></i>Stock OUT</span>
+                                    <% } %>
+                                </td>
+                                <td class="text-center fw-bold <%= m.type === 'in' ? 'text-success' : 'text-danger' %>">
+                                    <%= m.type === 'in' ? '+' : '-' %><%= m.quantity %>
+                                </td>
+                                <td class="text-muted-custom small"><%= m.reason || 'Routine inventory update' %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted-custom">No stock movement history recorded yet.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Adjust Stock -->
+<div class="modal fade" id="adjustStockModal" tabindex="-1" aria-labelledby="adjustStockModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="adjustStockModalLabel">
+                    <i class="fa-solid fa-boxes-stacked me-2 text-primary"></i>Adjust Product Stock
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/admin/inventory/adjust" method="POST">
+                <div class="modal-body py-3">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Product</label>
+                        <select name="product_id" id="modalProductId" class="form-select" required>
+                            <option value="">-- Choose a Product --</option>
+                            <% allProductsList.forEach(p => { %>
+                                <option value="<%= p.id %>" data-stock="<%= p.stock %>"><%= p.name %> (Current: <%= p.stock %>)</option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Adjustment Type</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="type" id="typeIn" value="in" checked>
+                                <label class="form-check-label text-success fw-semibold" for="typeIn">
+                                    <i class="fa-solid fa-circle-plus me-1"></i>Stock In (Restock / Add)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="type" id="typeOut" value="out">
+                                <label class="form-check-label text-danger fw-semibold" for="typeOut">
+                                    <i class="fa-solid fa-circle-minus me-1"></i>Stock Out (Damage / Deduction)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Quantity to Adjust</label>
+                        <input type="number" name="quantity" class="form-control" min="1" placeholder="e.g. 10" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Reason / Audit Note</label>
+                        <input type="text" name="reason" class="form-control" placeholder="e.g. New artisan batch, warehouse audit, defective piece" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-custom px-4">Save Adjustment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Setup & Modal Handler -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Sales Trend Chart
+    const trendData = <%- JSON.stringify(dailySales) %>;
+    const trendLabels = trendData.map(d => d.formatted_date);
+    const trendRevenues = trendData.map(d => d.revenue);
+
+    const ctxTrend = document.getElementById('salesTrendChart');
+    if (ctxTrend) {
+        new Chart(ctxTrend, {
+            type: 'line',
+            data: {
+                labels: trendLabels.length ? trendLabels : ['Today'],
+                datasets: [{
+                    label: 'Revenue (₦)',
+                    data: trendRevenues.length ? trendRevenues : [0],
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.12)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#8b5cf6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ' ₦' + Number(context.raw).toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₦' + Number(value).toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 2. Category Stock Donut Chart
+    const catData = <%- JSON.stringify(categoryStock) %>;
+    const catLabels = catData.map(c => c.category_name);
+    const catUnits = catData.map(c => c.total_units);
+
+    const ctxCat = document.getElementById('categoryStockChart');
+    if (ctxCat) {
+        new Chart(ctxCat, {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    data: catUnits,
+                    backgroundColor: [
+                        '#8b5cf6',
+                        '#ec4899',
+                        '#3b82f6',
+                        '#10b981',
+                        '#f59e0b',
+                        '#6366f1'
+                    ],
+                    borderWidth: 2,
+                    borderColor: 'var(--card-bg)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15,
+                            font: { size: 11 }
+                        }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+    }
+});
+
+// Helper for opening modal pre-selected
+function openAdjustModal(productId, productName, currentStock) {
+    const modalEl = document.getElementById('adjustStockModal');
+    const selectEl = document.getElementById('modalProductId');
+    if (selectEl) {
+        selectEl.value = productId;
+    }
+    const bsModal = new bootstrap.Modal(modalEl);
+    bsModal.show();
+}
+</script>

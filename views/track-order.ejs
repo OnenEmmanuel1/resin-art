@@ -1,0 +1,430 @@
+<section class="py-5" style="margin-top: 80px;">
+    <div class="container">
+        <!-- Header & Search Box -->
+        <div class="text-center mb-5">
+            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-semibold mb-2">
+                <i class="fa-solid fa-truck-fast me-1"></i> Live Shipment Tracker
+            </span>
+            <h1 class="display-5 fw-bold" style="font-family: 'Playfair Display', serif;">Track Your Package</h1>
+            <p class="text-muted-custom mx-auto" style="max-width: 600px;">
+                Enter your order tracking number or Order ID below to view real-time delivery status, production stages, and courier tracking updates.
+            </p>
+
+            <!-- Search Form -->
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-8 col-lg-6">
+                    <form action="/orders/track" method="GET" class="resin-card p-2 p-md-3 shadow-sm">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-0 ps-3">
+                                <i class="fa-solid fa-barcode fs-5 text-primary"></i>
+                            </span>
+                            <input type="text" name="tracking_number" class="form-control border-0 fs-6 shadow-none" 
+                                   placeholder="Enter Tracking # (e.g. TRAK-NG-884920) or Order #1" 
+                                   value="<%= query %>" required>
+                            <button type="submit" class="btn btn-primary-custom px-4 py-2">
+                                <i class="fa-solid fa-magnifying-glass me-1"></i> Track
+                            </button>
+                        </div>
+                    </form>
+                    <% if (order && order.delivery_tracking_number) { %>
+                        <div class="mt-2 text-start small">
+                            <span class="text-muted-custom">Current Tracking #: </span>
+                            <a href="/orders/track?tracking_number=<%= order.delivery_tracking_number %>" class="fw-semibold">
+                                <%= order.delivery_tracking_number %>
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <% if (notFound) { %>
+            <!-- Not Found Alert -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-8 col-lg-6">
+                    <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 text-center">
+                        <i class="fa-solid fa-triangle-exclamation fs-1 text-warning mb-3"></i>
+                        <h4 class="fw-bold">No Order Found</h4>
+                        <p class="text-muted-custom mb-3">
+                            We could not find an order matching "<strong><%= query %></strong>". Please double-check your tracking code or Order ID from your confirmation email.
+                        </p>
+                        <a href="/orders" class="btn btn-outline-custom btn-sm">
+                            <i class="fa-solid fa-box me-1"></i> View My Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <% if (order) { %>
+            <% 
+                // Determine Step progress (0 to 4)
+                let currentStep = 1; // 1: Placed, 2: Crafting/Processing, 3: Shipped, 4: Delivered
+                if (order.status === 'pending') currentStep = 1;
+                else if (order.status === 'paid') currentStep = 2;
+                else if (order.status === 'shipped') currentStep = 3;
+                else if (order.status === 'delivered') currentStep = 4;
+                else if (order.status === 'cancelled') currentStep = 0;
+
+                const estDelivery = new Date(order.created_at);
+                estDelivery.setDate(estDelivery.getDate() + 4);
+            %>
+
+            <!-- Tracking Overview Header Card -->
+            <div class="resin-card p-4 p-md-5 mb-4 position-relative overflow-hidden shadow-sm">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-7">
+                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                            <h2 class="mb-0 fw-bold">Order #<%= order.id %></h2>
+                            <span class="badge fs-6 
+                                <%= order.status === 'delivered' ? 'bg-success' : 
+                                   order.status === 'shipped' ? 'bg-info' : 
+                                   order.status === 'paid' ? 'bg-primary' : 
+                                   order.status === 'cancelled' ? 'bg-danger' : 'bg-warning' %>">
+                                <i class="fa-solid fa-circle-dot fa-fade me-1"></i>
+                                <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                            </span>
+                            <% if (order.delivery_tracking_number) { %>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="copyTracking('<%= order.delivery_tracking_number %>')">
+                                    <i class="fa-regular fa-copy me-1"></i><%= order.delivery_tracking_number %>
+                                </button>
+                            <% } %>
+                        </div>
+                        <p class="text-muted-custom mb-1">
+                            <i class="fa-regular fa-calendar me-1"></i> Ordered on <%= new Date(order.created_at).toLocaleDateString('en-NG', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' }) %>
+                        </p>
+                        <p class="text-muted-custom mb-0">
+                            <i class="fa-solid fa-truck me-1"></i> Carrier: <strong>ResinArt Express Logistics</strong> (Standard Ground Delivery)
+                        </p>
+                    </div>
+
+                    <div class="col-md-5 text-md-end">
+                        <span class="text-muted-custom small text-uppercase fw-semibold">Estimated Delivery</span>
+                        <h4 class="mb-0 fw-bold" style="color: var(--primary-color);">
+                            <%= estDelivery.toLocaleDateString('en-NG', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) %>
+                        </h4>
+                        <small class="text-muted-custom">By End of Day (5:00 PM)</small>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Visual Stepper Progress Bar -->
+                <div class="tracking-stepper my-3">
+                    <div class="stepper-progress-bar">
+                        <div class="stepper-progress-fill" style="width: <%= currentStep === 0 ? 0 : ((currentStep - 1) / 3) * 100 %>%;"></div>
+                    </div>
+
+                    <div class="row text-center position-relative">
+                        <!-- Step 1: Placed -->
+                        <div class="col-3 stepper-step <%= currentStep >= 1 ? 'completed' : '' %> <%= currentStep === 1 ? 'active' : '' %>">
+                            <div class="step-icon">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                            <h6 class="mt-2 mb-1 fw-bold step-title">Order Placed</h6>
+                            <small class="text-muted-custom d-none d-md-block">Payment Confirmed</small>
+                        </div>
+
+                        <!-- Step 2: Studio Crafting & Inspection -->
+                        <div class="col-3 stepper-step <%= currentStep >= 2 ? 'completed' : '' %> <%= currentStep === 2 ? 'active' : '' %>">
+                            <div class="step-icon">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </div>
+                            <h6 class="mt-2 mb-1 fw-bold step-title">In Studio</h6>
+                            <small class="text-muted-custom d-none d-md-block">Curing & Quality Check</small>
+                        </div>
+
+                        <!-- Step 3: Shipped -->
+                        <div class="col-3 stepper-step <%= currentStep >= 3 ? 'completed' : '' %> <%= currentStep === 3 ? 'active' : '' %>">
+                            <div class="step-icon">
+                                <i class="fa-solid fa-truck-fast"></i>
+                            </div>
+                            <h6 class="mt-2 mb-1 fw-bold step-title">Out for Delivery</h6>
+                            <small class="text-muted-custom d-none d-md-block">Carrier in Transit</small>
+                        </div>
+
+                        <!-- Step 4: Delivered -->
+                        <div class="col-3 stepper-step <%= currentStep >= 4 ? 'completed' : '' %> <%= currentStep === 4 ? 'active' : '' %>">
+                            <div class="step-icon">
+                                <i class="fa-solid fa-house-circle-check"></i>
+                            </div>
+                            <h6 class="mt-2 mb-1 fw-bold step-title">Delivered</h6>
+                            <small class="text-muted-custom d-none d-md-block">Handed to Recipient</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-Column Delivery & Timeline Layout -->
+            <div class="row g-4">
+                <!-- Left Column: Destination & Items Summary -->
+                <div class="col-lg-7">
+                    <!-- Delivery Destination Card -->
+                    <div class="resin-card p-4 mb-4 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0 fw-bold"><i class="fa-solid fa-location-dot text-primary me-2"></i>Shipping Destination</h5>
+                            <span class="badge bg-light text-dark"><i class="fa-solid fa-shield-check text-success me-1"></i>Verified Address</span>
+                        </div>
+                        <p class="mb-1 fw-semibold fs-6">
+                            <%= order.first_name ? (order.first_name + ' ' + (order.last_name || '')) : 'Customer' %>
+                        </p>
+                        <p class="text-muted-custom mb-2">
+                            <i class="fa-solid fa-house-chimney me-2"></i><%= order.shipping_address %>
+                        </p>
+                        <% if (order.phone) { %>
+                            <p class="text-muted-custom small mb-0">
+                                <i class="fa-solid fa-phone me-2"></i><%= order.phone %>
+                            </p>
+                        <% } %>
+                    </div>
+
+                    <!-- Package Items Summary -->
+                    <div class="resin-card p-4 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0 fw-bold"><i class="fa-solid fa-box-open text-primary me-2"></i>Package Items</h5>
+                            <span class="text-muted-custom small"><%= items.length %> item<%= items.length > 1 ? 's' : '' %></span>
+                        </div>
+
+                        <% items.forEach(item => { %>
+                            <div class="d-flex align-items-center justify-content-between py-3 border-bottom">
+                                <div class="d-flex align-items-center gap-3">
+                                    <% if (item.image_url) { %>
+                                        <img src="<%= item.image_url %>" alt="" class="rounded" style="width: 55px; height: 55px; object-fit: cover;">
+                                    <% } else { %>
+                                        <div class="rounded bg-light d-flex align-items-center justify-content-center text-muted" style="width: 55px; height: 55px;">
+                                            <i class="fa-solid fa-gem"></i>
+                                        </div>
+                                    <% } %>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold"><%= item.name %></h6>
+                                        <small class="text-muted-custom">Qty: <%= item.quantity %> × ₦<%= Number(item.price).toLocaleString() %></small>
+                                    </div>
+                                </div>
+                                <div class="text-end fw-bold">
+                                    ₦<%= (item.price * item.quantity).toLocaleString() %>
+                                </div>
+                            </div>
+                        <% }) %>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3">
+                            <span class="text-muted-custom">Total Amount Paid</span>
+                            <span class="fs-5 fw-bold" style="color: var(--primary-color);">₦<%= Number(order.total_amount).toLocaleString() %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Live Event Log & Helpdesk -->
+                <div class="col-lg-5">
+                    <!-- Live Tracking Events Timeline -->
+                    <div class="resin-card p-4 mb-4 shadow-sm">
+                        <h5 class="mb-4 fw-bold"><i class="fa-solid fa-timeline text-primary me-2"></i>Shipment Activity</h5>
+                        
+                        <div class="activity-timeline">
+                            <% if (order.status === 'delivered') { %>
+                                <div class="timeline-item active">
+                                    <div class="timeline-dot bg-success"></div>
+                                    <div class="timeline-content">
+                                        <div class="fw-bold text-success">Package Delivered</div>
+                                        <p class="small text-muted-custom mb-1">Delivered to recipient at specified shipping address.</p>
+                                        <small class="text-muted-custom"><%= new Date().toLocaleDateString('en-NG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></small>
+                                    </div>
+                                </div>
+                            <% } %>
+
+                            <% if (order.status === 'shipped' || order.status === 'delivered') { %>
+                                <div class="timeline-item <%= order.status === 'shipped' ? 'active' : '' %>">
+                                    <div class="timeline-dot bg-info"></div>
+                                    <div class="timeline-content">
+                                        <div class="fw-bold">Out for Delivery with Courier</div>
+                                        <p class="small text-muted-custom mb-1">Package in transit with tracking ID: <%= order.delivery_tracking_number || 'TRAK-NG' %>.</p>
+                                        <small class="text-muted-custom"><%= new Date(order.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' }) %> - 08:30 AM</small>
+                                    </div>
+                                </div>
+                            <% } %>
+
+                            <div class="timeline-item <%= order.status === 'paid' ? 'active' : '' %>">
+                                <div class="timeline-dot bg-primary"></div>
+                                <div class="timeline-content">
+                                    <div class="fw-bold">Artisan Studio Handcrafting</div>
+                                    <p class="small text-muted-custom mb-1">Artisan resin pouring, crystal curing, and precision edging.</p>
+                                    <small class="text-muted-custom"><%= new Date(order.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' }) %> - 11:15 AM</small>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item">
+                                <div class="timeline-dot bg-secondary"></div>
+                                <div class="timeline-content">
+                                    <div class="fw-bold">Order Received & Confirmed</div>
+                                    <p class="small text-muted-custom mb-1">Payment verified via Paystack. Order sent to production line.</p>
+                                    <small class="text-muted-custom"><%= new Date(order.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Support Card -->
+                    <div class="resin-card p-4 shadow-sm" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(236, 72, 153, 0.05));">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: var(--primary-color); color: white;">
+                                <i class="fa-solid fa-headset fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Need Help with Delivery?</h6>
+                                <small class="text-muted-custom">Our support team is on standby</small>
+                            </div>
+                        </div>
+                        <p class="small text-muted-custom mb-3">
+                            If you need to change your delivery window or have special drop-off instructions, contact our logistics desk.
+                        </p>
+                        <div class="d-flex gap-2">
+                            <a href="/contact" class="btn btn-outline-custom btn-sm flex-fill">
+                                <i class="fa-solid fa-envelope me-1"></i> Contact Desk
+                            </a>
+                            <a href="/orders/<%= order.id %>" class="btn btn-primary-custom btn-sm flex-fill">
+                                <i class="fa-solid fa-receipt me-1"></i> Order Receipt
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</section>
+
+<!-- Custom Styling for Stepper & Timelines -->
+<style>
+/* Tracking Stepper */
+.tracking-stepper {
+    position: relative;
+    padding: 20px 0;
+}
+
+.stepper-progress-bar {
+    position: absolute;
+    top: 45px;
+    left: 12%;
+    width: 76%;
+    height: 6px;
+    background-color: var(--border-color);
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.stepper-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+}
+
+.stepper-step {
+    position: relative;
+    z-index: 2;
+}
+
+.step-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    border: 3px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+}
+
+.stepper-step.completed .step-icon {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.stepper-step.active .step-icon {
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+    background: var(--card-bg);
+    box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.2);
+    animation: pulse 1.8s infinite;
+}
+
+.stepper-step.completed .step-title,
+.stepper-step.active .step-title {
+    color: var(--text-dark);
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+}
+
+/* Activity Timeline */
+.activity-timeline {
+    position: relative;
+    padding-left: 24px;
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    bottom: 6px;
+    width: 2px;
+    background-color: var(--border-color);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -24px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid var(--card-bg);
+}
+
+.timeline-item.active .timeline-dot {
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+.timeline-content {
+    padding-left: 8px;
+}
+
+@media (max-width: 576px) {
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    .stepper-progress-bar {
+        top: 38px;
+    }
+    .step-title {
+        font-size: 0.8rem;
+    }
+}
+</style>
+
+<script>
+function copyTracking(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Tracking number copied: ' + text);
+    });
+}
+</script>

@@ -23,8 +23,11 @@
                                 <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
                             </span>
                         </div>
-                        <div class="col-md-3"><strong style="color:var(--primary-color)">₦<%= Number(order.total_amount).toLocaleString() %></strong></div>
-                        <div class="col-md-2 text-end"><a href="/orders/<%= order.id %>" class="btn btn-outline-custom btn-sm">View Details</a></div>
+                        <div class="col-md-2"><strong style="color:var(--primary-color)">₦<%= Number(order.total_amount).toLocaleString() %></strong></div>
+                        <div class="col-md-3 text-end d-flex gap-2 justify-content-end">
+                            <a href="/orders/track/<%= order.id %>" class="btn btn-outline-custom btn-sm"><i class="fa-solid fa-truck-fast me-1"></i>Track</a>
+                            <a href="/orders/<%= order.id %>" class="btn btn-primary-custom btn-sm">Details</a>
+                        </div>
                     </div>
                 </div>
             <% }) %>

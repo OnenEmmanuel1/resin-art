@@ -7,6 +7,7 @@ const Category = require('../models/Category');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Review = require('../models/Review');
+const Inventory = require('../models/Inventory');
 
 // Admin Dashboard
 router.get('/dashboard', isStaff, async (req, res) => {
@@ -386,6 +387,92 @@ router.post('/sales-reps/delete/:id', isAdmin, async (req, res) => {
         console.error(error);
         req.session.error = 'Error deleting sales rep.';
         res.redirect('/admin/sales-reps');
+    }
+});
+
+// ===================== SALES & INVENTORY REPORT =====================
+
+router.get('/reports', isStaff, async (req, res) => {
+    try {
+        const { search, category_id, stock_status } = req.query;
+
+        const inventorySummary = await Inventory.getInventorySummary();
+        const salesSummary = await Inventory.getSalesSummary();
+        const categoryStock = await Inventory.getStockByCategory();
+        const topSelling = await Inventory.getTopSellingProducts(5);
+        const dailySales = await Inventory.getDailySalesTrend(14);
+        const movements = await Inventory.getRecentMovements(15);
+        const detailedProducts = await Inventory.getDetailedInventory({
+            search,
+            category_id,
+            stock_status
+        });
+        const categories = await Category.getAll();
+        const allProductsList = await Product.getAll({ limit: 200 });
+
+        res.render('admin/reports', {
+            title: 'Sales & Inventory Reports',
+            layout: 'layouts/admin',
+            inventorySummary,
+            salesSummary,
+            categoryStock,
+            topSelling,
+            dailySales,
+            movements,
+            detailedProducts,
+            categories,
+            allProductsList,
+            filters: {
+                search: search || '',
+                category_id: category_id || '',
+                stock_status: stock_status || ''
+            }
+        });
+    } catch (error) {
+        console.error('Error loading reports:', error);
+        req.session.error = 'Error loading reports & inventory data.';
+        res.redirect('/admin/dashboard');
+    }
+});
+
+// POST Adjust Stock
+router.post('/inventory/adjust', isStaff, async (req, res) => {
+    try {
+        const { product_id, quantity, type, reason } = req.body;
+        await Inventory.adjustStock({
+            product_id: parseInt(product_id, 10),
+            quantity: parseInt(quantity, 10),
+            type,
+            reason
+        });
+        req.session.success = `Stock successfully updated (${type === 'in' ? '+' : '-'}${quantity} units).`;
+        res.redirect('/admin/reports');
+    } catch (error) {
+        console.error('Error adjusting stock:', error);
+        req.session.error = error.message || 'Error updating stock.';
+        res.redirect('/admin/reports');
+    }
+});
+
+// GET Export Inventory CSV
+router.get('/reports/export-csv', isStaff, async (req, res) => {
+    try {
+        const products = await Inventory.getDetailedInventory();
+        let csv = 'Product ID,Product Name,Category,Price (NGN),Stock (Units),Stock Valuation (NGN),Units Sold,Sales Revenue (NGN),Status\n';
+        
+        products.forEach(p => {
+            const cleanName = `"${(p.name || '').replace(/"/g, '""')}"`;
+            const cleanCat = `"${(p.category_name || 'Uncategorized').replace(/"/g, '""')}"`;
+            csv += `${p.id},${cleanName},${cleanCat},${p.price},${p.stock},${p.inventory_value},${p.units_sold},${p.revenue_generated},${p.status}\n`;
+        });
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="inventory-report-${Date.now()}.csv"`);
+        res.status(200).send(csv);
+    } catch (error) {
+        console.error('CSV Export Error:', error);
+        req.session.error = 'Failed to export CSV.';
+        res.redirect('/admin/reports');
     }
 });
 

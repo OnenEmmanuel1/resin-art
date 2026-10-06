@@ -27,13 +27,35 @@ async function setupDatabase() {
                 first_name VARCHAR(100) NOT NULL,
                 last_name VARCHAR(100) NOT NULL,
                 email VARCHAR(150) NOT NULL UNIQUE,
-                password VARCHAR(255) NOT NULL,
+                password VARCHAR(255) NULL,
                 phone VARCHAR(20),
                 address TEXT,
-                role ENUM('customer', 'admin') DEFAULT 'customer',
+                profile_image VARCHAR(255) DEFAULT NULL,
+                google_id VARCHAR(255) DEFAULT NULL,
+                facebook_id VARCHAR(255) DEFAULT NULL,
+                role ENUM('customer', 'admin', 'sales_rep') DEFAULT 'customer',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+
+        // Ensure missing columns are added if users table already existed
+        const [userCols] = await connection.query('DESCRIBE users');
+        const userColNames = userCols.map(c => c.Field);
+        if (!userColNames.includes('profile_image')) {
+            await connection.query('ALTER TABLE users ADD COLUMN profile_image VARCHAR(255) DEFAULT NULL AFTER address');
+            console.log("Added missing column 'profile_image' to users table.");
+        }
+        if (!userColNames.includes('google_id')) {
+            await connection.query('ALTER TABLE users ADD COLUMN google_id VARCHAR(255) DEFAULT NULL AFTER profile_image');
+            console.log("Added missing column 'google_id' to users table.");
+        }
+        if (!userColNames.includes('facebook_id')) {
+            await connection.query('ALTER TABLE users ADD COLUMN facebook_id VARCHAR(255) DEFAULT NULL AFTER google_id');
+            console.log("Added missing column 'facebook_id' to users table.");
+        }
+        await connection.query('ALTER TABLE users MODIFY COLUMN password VARCHAR(255) NULL');
+        await connection.query("ALTER TABLE users MODIFY COLUMN role ENUM('customer', 'admin', 'sales_rep') DEFAULT 'customer'");
+
 
         // Create Categories Table
         await connection.query(`
@@ -184,15 +206,15 @@ async function setupDatabase() {
 
         // Insert a default admin user
         const bcrypt = require('bcrypt');
-        const hashedPassword = await bcrypt.hash('admin123', 10);
-        
+        const hashedPassword = await bcrypt.hash('password123', 10);
+
         const [adminRows] = await connection.query('SELECT * FROM users WHERE email = ?', ['admin@resinart.com']);
         if (adminRows.length === 0) {
             await connection.query(
                 'INSERT INTO users (first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?)',
                 ['Super', 'Admin', 'admin@resinart.com', hashedPassword, 'admin']
             );
-            console.log("Default admin user created: admin@resinart.com / admin123");
+            console.log("Default admin user created: admin@resinart.com / password123");
         }
 
         await connection.end();

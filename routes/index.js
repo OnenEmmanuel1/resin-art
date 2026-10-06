@@ -37,4 +37,10 @@ router.post('/contact', (req, res) => {
     res.redirect('/contact');
 });
 
+// Track shortcut route
+router.get('/track', (req, res) => {
+    const q = req.query.tracking_number || req.query.order_id || req.query.q || '';
+    res.redirect('/orders/track' + (q ? '?tracking_number=' + encodeURIComponent(q) : ''));
+});
+
 module.exports = router;

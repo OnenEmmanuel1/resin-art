@@ -24,6 +24,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/contact">Contact</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/orders/track"><i class="fa-solid fa-truck-fast me-1"></i>Track Order</a>
+                </li>
 
                 <% if (user) { %>
                     <li class="nav-item dropdown">
@@ -43,6 +46,7 @@
                             <% } else { %>
                                 <li><a class="dropdown-item" href="/profile"><i class="fa-regular fa-id-badge me-2"></i>Profile</a></li>
                                 <li><a class="dropdown-item" href="/orders"><i class="fa-solid fa-box me-2"></i>Orders</a></li>
+                                <li><a class="dropdown-item" href="/orders/track"><i class="fa-solid fa-truck-fast me-2"></i>Track Order</a></li>
                             <% } %>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>

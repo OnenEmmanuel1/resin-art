@@ -5,6 +5,7 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Payment = require('../models/Payment');
 const Notification = require('../models/Notification');
+const Inventory = require('../models/Inventory');
 const { isLoggedIn } = require('../middlewares/auth');
 
 // GET Order history
@@ -16,6 +17,81 @@ router.get('/', isLoggedIn, async (req, res) => {
         console.error(error);
         req.session.error = 'Error loading orders.';
         res.redirect('/');
+    }
+});
+
+// GET Order Tracking Page
+router.get('/track', async (req, res) => {
+    try {
+        const query = req.query.tracking_number || req.query.order_id || req.query.q;
+        let order = null;
+        let items = [];
+        let payment = null;
+        let notFound = false;
+
+        if (query) {
+            order = await Order.findByOrderOrTracking(query);
+            if (order) {
+                items = await Order.getItems(order.id);
+                payment = await Payment.getByOrder(order.id);
+            } else {
+                notFound = true;
+            }
+        } else if (req.session && req.session.user) {
+            // If logged in and no query, pick user's most recent order
+            const userOrders = await Order.getByUser(req.session.user.id);
+            if (userOrders.length > 0) {
+                const activeOrder = userOrders.find(o => ['paid', 'shipped'].includes(o.status)) || userOrders[0];
+                order = await Order.findById(activeOrder.id);
+                items = await Order.getItems(order.id);
+                payment = await Payment.getByOrder(order.id);
+            }
+        }
+
+        res.render('track-order', {
+            title: order ? `Tracking #${order.delivery_tracking_number || order.id}` : 'Track Your Order',
+            query: query || '',
+            order,
+            items,
+            payment,
+            notFound
+        });
+    } catch (error) {
+        console.error('Tracking Error:', error);
+        req.session.error = 'Unable to look up order tracking.';
+        res.redirect('/orders');
+    }
+});
+
+// GET Order Tracking by ID (direct link from order details / orders list)
+router.get('/track/:id', async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const order = await Order.findById(orderId);
+        if (!order) {
+            req.session.error = 'Order not found.';
+            return res.redirect('/orders/track');
+        }
+
+        if (req.session && req.session.user && req.session.user.role !== 'admin' && order.user_id !== req.session.user.id) {
+            req.session.error = 'Access denied.';
+            return res.redirect('/orders');
+        }
+
+        const items = await Order.getItems(order.id);
+        const payment = await Payment.getByOrder(order.id);
+
+        res.render('track-order', {
+            title: `Track Order #${order.id}`,
+            query: order.delivery_tracking_number || order.id,
+            order,
+            items,
+            payment,
+            notFound: false
+        });
+    } catch (error) {
+        console.error('Track by ID Error:', error);
+        res.redirect('/orders/track');
     }
 });
 
@@ -71,6 +147,12 @@ router.post('/place', isLoggedIn, async (req, res) => {
                 price: item.price
             });
             await Product.updateStock(item.product_id, item.quantity);
+            await Inventory.logMovement({
+                product_id: item.product_id,
+                quantity: item.quantity,
+                type: 'out',
+                reason: `Order #${orderId} purchase`
+            });
         }
 
         // Create payment record
